@@ -1,0 +1,223 @@
+/* Copyright (C) 2011 Bheesham Persaud. */
+html, body {
+	font-family: Arial, "Times New Roman";
+	height: 96%;
+	min-height: 96%;
+	max-height: 96%;
+}
+
+small {
+	font-size: 12px;
+}
+
+a {
+	color: #000000;
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #819FF7;
+}
+
+input.button {
+	border: none;
+	background-color: #81F781;
+	min-width: 50px;
+}
+
+input.text {
+	background-color: #81F781;
+	border: none;
+}
+
+input.file {
+	border: none;
+	background-color: #81F781;
+	width: 400px;
+}
+
+p.error, p.error p {
+	background-color: #F5A9A9;
+	padding: 3px;
+}
+
+p.success, p.success p {
+	background-color: #64FE2E;
+	padding: 3px;
+}
+
+h1, h2, h3, h4 {
+	margin: 0px;
+	padding: 0px;
+}
+
+h1 a, h1 a:hover {
+	text-decoration: none;
+	color: #555555;
+}
+
+#login-form {
+	width: 300px;
+	margin: 0px;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+	background-color: #E0F8F7;
+	padding: 10px;
+	border-top: 1px solid #CCCCCC;
+}
+
+#login-header {
+	z-index: 2;
+	position: relative;
+	top: 12px;
+	width: 300px;
+	margin: 0px;
+	margin-top: 100px;
+	margin-right: auto;
+	margin-left: auto;
+	color: #555555;
+	text-align: left;
+}
+
+#container {
+	width: 600px;
+	height: 100%;
+	margin: 0px;
+	margin-right: auto;
+	margin-left: auto;
+	background-color: #E0F8F7;
+	padding: 0px;
+	padding-top: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 3px;
+	border-top: 1px solid #CCCCCC;
+}
+
+#title {
+	z-index: 2;
+	width: 600px;
+	position: relative;
+	top: 12px;
+	margin: 0px;
+	margin-top: 5px;
+	margin-right: auto;
+	margin-left: auto;
+	color: #555555;
+}
+
+
+#top-nav {
+	text-align: right;
+	padding: 0px;
+	margin: 0px;
+}
+
+div.torrent-info-container {
+	width: 503px;
+	height: 75px;
+	padding: 0px;
+	margin: 0px;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: 10px;
+	background-color: #FFFFFF;
+	text-align: center;
+	padding-left: 3px;
+}
+
+div.torrent-info-container p {
+	margin: 0px;
+	padding: 0px;
+}
+
+div.torrent-info {
+	width: 399px;
+	height: 100%;
+	float: left;
+	padding: 0px;
+	margin: 0px;
+	text-align: left;
+	font-size: 15px;
+}
+
+div.torrent-controls {
+	width: 90px;
+	height: 100%;
+	padding: 0px;
+	padding-top: 3px;
+	margin: 0px;
+	float: right;
+	text-align: left;
+	font-size: 12px;
+}
+
+div.torrent-progress-bar-wrap {
+	width: 399px;
+	height: 20px;
+	margin: 0px;
+	padding: 0px;
+	background-color: #F0F0F0;
+}
+
+div.torrent-progress-bar {
+	width: 0%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	background-color: #82FA58;
+}
+
+div.torrent-progress-bar p {
+	height: 100%;
+	padding-right: 5px;
+	padding-top: 3px;
+	text-align: right;
+	font-size: 12px;
+}
+
+#hover-title-box {
+	background-color: #F3F781;
+	border: 1px solid #454545;
+	text-align: left;
+	position: absolute;
+	display: none;
+	padding: 3px;
+}
+
+span.torrent-start {
+	background-image: url('control_play_blue.png');
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	display: none;
+}
+
+span.torrent-start:hover {
+	background-image: url('control_play.png');
+}
+
+span.torrent-stop {
+	background-image: url('stop.png');
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	display: none;
+}
+
+span.torrent-options {
+	background-image: url('cog.png');
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	display: none;
+}
+
+span.torrent-options:hover {
+	background-image: url('cog_edit.png');
+}
+
+span.torrent-delete {
+	background-image: url('cross.png');
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	display: none;
+}

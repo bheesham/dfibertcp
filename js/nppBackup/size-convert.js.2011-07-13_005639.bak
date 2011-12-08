@@ -1,0 +1,4 @@
+// http://stackoverflow.com/questions/818830/is-there-a-good-jquery-plugin-or-js-code-for-time-durations/818920#818920
+jQuery.fn.time_from_seconds = function() {
+    
+};

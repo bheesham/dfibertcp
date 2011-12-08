@@ -1,0 +1,167 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Home extends CI_Controller {
+	public function index() {
+		if ( $this->session->userdata('uid') == FALSE ) {
+			redirect( '/Login/index' );
+		}
+		
+		$data = array();
+		
+		$sql = 'SELECT `transmission_id`, `torrent_name`  FROM dft_torrents WHERE `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+		$res = $this->db->query( $sql );
+		if ( $res->num_rows > 0 ) {
+			foreach ($res->result() as $row) {
+				$data['torrents'][ $row->transmission_id ] = $row->torrent_name;
+			}
+		} else {
+			$data['no_torrents'] = TRUE;
+		}
+		
+		$ttorrents = 'SELECT `tid` FROM dft_torrents WHERE `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+		$ttorrents_res = $this->db->query( $ttorrents );
+		if ( $ttorrents_res->num_rows() >= $this->session->userdata('max_uploaded_torrents') ) {
+			$data['no_show_upload'] = TRUE;
+		}
+		
+		$this->load->view('overall_header');
+		$this->load->view( 'page_home', $data );
+		$this->load->view('overall_footer');
+	}
+	
+	private function RPCInit() {
+		$this->load->library( 'TransmissionRPC', null, 'TransmissionRPC' );
+		$this->TransmissionRPC->url = 'http://' . $this->config->item('dft_host') . ':' . $this->config->item('dft_port') . '/transmission/rpc';
+		$this->TransmissionRPC->username = $this->config->item('dft_username');
+		$this->TransmissionRPC->password = $this->config->item('dft_password');
+		return $this->TransmissionRPC;
+	}
+	
+	public function upload_torrent() {
+		if ( $this->session->userdata('uid') == FALSE ) {
+			redirect( '/Login/index' );
+		}
+		
+		if ( $this->input->post('submit_torrent') == FALSE ) {
+			redirect( '/Home/index' );
+		}
+		
+		$data = array();
+		
+		
+		$ttorrents = 'SELECT `tid` FROM dft_torrents WHERE `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+		$ttorrents_res = $this->db->query( $ttorrents );
+		if ( $ttorrents_res->num_rows() >= $this->session->userdata('max_uploaded_torrents') ) {
+			$data['no_show_upload'] = TRUE;
+		}
+		
+		
+		$data['no_show_torrents'] 	= TRUE;
+		
+		$torrent_folder 			= realpath( './users/' ) . '/' . intval( $this->session->userdata('uid') ) . '/';
+		
+		if ( !file_exists( $torrent_folder ) || !file_exists( $torrent_folder . 'torrents/' ) || !file_exists( $torrent_folder . 'downloads/' ) ) {
+			mkdir( $torrent_folder , 0777, true );
+			mkdir( $torrent_folder . 'torrents/', 0777, true );
+			mkdir( $torrent_folder . 'downloads/', 0777, true );
+		}
+		
+		if ( fileperms( $torrent_folder ) != 0777 || fileperms( $torrent_folder . 'torrents/' ) != 0777 || fileperms( $torrent_folder . 'downloads/' ) != 0777 ) {
+			chmod( $torrent_folder, 0777 );
+			chmod( $torrent_folder . 'torrents/', 0777 );
+			chmod( $torrent_folder . 'downloads/', 0777 );
+		}
+		
+		$config = array( 
+			'encrypt_name'		=> TRUE,
+			'allowed_types'		=> 'torrent',
+			'upload_path'		=> $torrent_folder . 'torrents/',
+			'max_size'			=> '2000',
+			'remove_spaces' 	=> TRUE
+		);
+		
+		
+		$ttorrents = 'SELECT `tid` FROM dft_torrents WHERE `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+		$ttorrents_res = $this->db->query( $ttorrents );
+		
+		if ( $ttorrents_res->num_rows() < $this->session->userdata('max_uploaded_torrents') ) {
+			$this->load->library( 'upload', $config );
+			$this->form_validation->set_error_delimiters('<p class="error">', '</p>');
+			$this->form_validation->set_rules('limit_upload', 'upload speed limit', 'required|numeric');
+			$this->form_validation->set_rules('limit_download', 'download speed limit', 'required|numeric');
+			
+			if ( !$this->upload->do_upload('upload_torrent') || !$this->form_validation->run() ) {
+				$data['error'] = $this->upload->display_errors();
+			} else {
+				$limit_upload 		= $this->input->post('limit_upload');
+				$limit_download 	= $this->input->post('limit_download');
+				
+				$torrent = $this->upload->data();
+				$torrent_md5 = md5_file( $torrent['full_path'] );
+				$exists = 'SELECT `tid` FROM dft_torrents WHERE `md5_of_torrent`=' . $this->db->escape( $torrent_md5 ) . ' 
+				AND `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+				$exists_res = $this->db->query( $exists );
+				
+				if ( $exists_res->num_rows > 0 ) {
+					$data['error'] = 'You have already uploaded that torrent.';
+				} else if ( $limit_upload > $this->session->userdata('max_upload') || $limit_download > $this->session->userdata('max_download') ) {
+					$data['error'] = 'Download or upload speed is set too high.';
+				} else {
+					$this->RPCInit();
+					$limit_upload 		= $limit_upload * 1000;
+					$limit_download 	= $limit_download * 1000;
+					$add_result = $this->TransmissionRPC->add_file( $torrent['full_path'], $torrent_folder . 'downloads/', array(
+						'paused' => TRUE
+					));
+					if ( $add_result->result == 'success' ) {
+						$this->TransmissionRPC->set( $add_result->arguments->torrent_added->id, array(
+							'uploadLimit'		=> $limit_upload,
+							'uploadLimited'		=> TRUE,
+							'downloadLimit'		=> $limit_download,
+							'downloadLimited'	=> TRUE,
+							'location'			=> $torrent_folder . 'downloads/'
+						));
+						
+						$get_size 		= $this->TransmissionRPC->get( $add_result->arguments->torrent_added->id , array( 'sizeWhenDone' ) );
+						$torrent_size 	= $get_size->arguments->torrents[0]->sizeWhenDone / 1024 / 1024;
+						
+						$query 			= 'SELECT `total_disk_usage` FROM dft_users WHERE `uid`=' . intval( $this->session->userdata('uid') ) . ';';
+						$res 			= $this->db->query( $query );
+						$row 			= $res->row();
+						
+						if ( ( $row->total_dis_usage + $torrent_size ) < $this->session->userdata('max_total_disk_usage') ) {
+							$info = array(
+									'uid'					=> intval( $this->session->userdata('uid') ),
+									'transmission_id' 		=> $add_result->arguments->torrent_added->id,
+									'orig_name'				=> $torrent['orig_name'],
+									'real_name'				=> $torrent['raw_name'],
+									'md5_of_torrent'		=> $torrent_md5,
+									'hash_of_torrent' 		=> $add_result->arguments->torrent_added->hashString,
+									'torrent_name' 			=> $add_result->arguments->torrent_added->name,
+									'size'					=> $torrent_size
+								);
+							$this->db->insert( 'dft_torrents', $info );
+							$this->TransmissionRPC->start( $add_result->arguments->torrent_added->id );
+							$data['success'] = 'That torrent has been uploaded successfully.';
+						} else {
+							unlink( $torrent['full_path'] );
+							$this->TransmissionRPC->remove( $add_result->arguments->torrent_added->id, TRUE );
+							$data['success'] = 'By adding that torrent, you will exceed your disk usage.';
+						}
+					} else {
+						unlink( $torrent['full_path'] );
+						$data['error'] = 'There was an error adding that torrent. Sorry :(';
+					}
+					
+				}
+			}
+		} else {
+			$data['error'] = 'You cannot upload anymore torrents as you have reached your limit.';
+		}
+		
+		$this->load->view('overall_header');
+		$this->load->view( 'page_home', $data );
+		$this->load->view('overall_footer');
+	}
+	
+}

@@ -1,0 +1,16 @@
+// Copyright (C) 2011 Bheesham Persaud.
+jQuery.fn.size_from_bytes = function() {
+    var bytes = $(this).text();
+	var ret = "";
+	if ( bytes > 1073741824 ) {
+		ret = ( bytes / 1024 / 1024 / 1024 ).toFixed(2) + " GB";
+	} else if ( bytes > 1048576 ) {
+		ret = ( bytes / 1024 / 1024 ).toFixed(2) + " MB";
+	} else if ( bytes >= 1024 ) {
+		ret = ( bytes / 1024 ).toFixed(2) + " KB";
+	} else {
+		ret = bytes.toFixed(2) + " Bytes";
+	}
+	$(this).text = ret;
+	return ret;
+};

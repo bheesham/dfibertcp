@@ -1,0 +1,11 @@
+// Copyright (C) 2011 Bheesham Persaud.
+jQuery.fn.size_from_bytes = function() {
+    if (bytes > 1073741824)
+		return String.Format(FORMAT, (bytes / 1024 / 1024 / 1024)) + " GB";
+	else if (bytes > 1048576)
+		return String.Format(FORMAT, (bytes / 1024 / 1024)) + " MB";
+	else if (bytes >= 1024)
+		return String.Format(FORMAT, (bytes / 1024)) + " KB";
+	else
+		return bytes + " Bytes";
+};

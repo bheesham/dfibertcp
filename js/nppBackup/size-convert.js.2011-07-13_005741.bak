@@ -1,0 +1,4 @@
+// Copyright (C) 2011 Bheesham Persaud.
+jQuery.fn.size_from_text = function() {
+    var bytes = $(this).attr('value');
+};

@@ -1,0 +1,90 @@
+<h1 id="title">Home</h1>
+<div id="container">
+	<p id="top-nav">
+	 &nbsp; <a href="index.php/Home/index" class="hover" title="GO HOME!"><img src="style/house.png" alt="house" />Home</a> 
+	 &nbsp; <a href="index.php/Profile/index" class="hover" title="Change your password, e-mail, etc."><img src="style/tux.png" alt="tux" />Profile</a> 
+	 &nbsp; <a href="index.php/Login/logout" class="hover" title="Logs you out of the system but keeps your torrents running."><img src="style/door.png" alt="door" />Logout</a></p>
+	<?php echo validation_errors(); ?>
+	<?php if ( isset( $error ) ) { echo '<p class="error">' . strip_tags( $error ) . '</p>'; } ?>
+	<?php if ( isset( $success ) ) { echo '<p class="success">' . strip_tags( $success ) . '</p>'; } ?>
+	
+	<?php if ( !isset( $no_show_upload ) ) { ?>
+		<form action="index.php/Home/upload_torrent" method="post" enctype="multipart/form-data">
+			<h3 id="show-upload-torrent-form" class="hover" title="Click here to view the upload form.">Upload a torrent</h3>
+			<p id="upload-torrent">
+				<label for="upload_torrent">Select:</label><input type="file" class="file" name="upload_torrent" id="upload_torrent" /><br />
+				<small>NOTE: The maximum .torrent file size allowed is 2MB</small><br /><br />
+				
+				<strong id="expand-torrent-options" class="hover" title="Click to view the advanced uploading options for this torrent.">Advanced options</strong><br />
+					<span id="torrent-options">
+						<label for="limit_upload">Upload speed:</label><input type="text" name="limit_upload" id="limit_upload" value="200" />KiB/s<br />
+						<label for="limit_download">Download speed:</label><input type="text" name="limit_download" id="limit_download" value="200" />KiB/s<br />
+					</span>
+				<br />
+				
+				<input type="submit" class="button" name="submit_torrent" value="Upload" /><br />
+			</p>
+		</form>
+		<hr />
+	<?php
+		}
+		if ( !isset( $no_show_torrents ) ) {
+	?>
+		<h3 id="uploaded-torrents-list">Uploaded Torrents</h3>
+		<?php if ( isset( $no_torrents ) ) { ?>
+			<p class="error">You have yet to upload torrents.</p>
+		<?php } else { 
+				$transmission_ids = array();
+				foreach ( $torrents as $tran_id => $torrent_name ) {
+					$transmission_ids[] = $tran_id;
+		?>
+			<div class="torrent-info-container torrent-container-<?php echo $tran_id; ?>">
+				<div class="torrent-info">
+					<?php
+						$chopped = substr( $torrent_name, 0, 40 );
+						if ( $torrent_name != $chopped ) { 
+							$chopped = "$chopped...";
+						}
+					?>
+					<p>
+						<strong><span class="hover" title="<?php echo $torrent_name; ?>"><?php echo $chopped; ?></span></strong>
+					</p>
+					<div class="torrent-progress-bar-wrap">
+						<div id="torent-progress-bar-<?php echo $tran_id; ?>" class="torrent-progress-bar">
+							<p>N/A</p>
+						</div>
+					</div>
+					<p>
+						Status: <strong><span id="status-<?php echo $tran_id; ?>">N/A</span></strong>&nbsp; <br />
+						Upload: <span id="upload-<?php echo $tran_id; ?>">N/A</span> KiB/s&nbsp; 
+						Download: <span id="download-<?php echo $tran_id; ?>">N/A</span> KiB/s<br />
+						Total Uploaded: <span id="upload-<?php echo $tran_id; ?>">N/A</span> Total Downloaded: <br />
+						Peers: <span id="peers-downloading-<?php echo $tran_id; ?>">N/A</span> of 
+								<span id="peers-connected-<?php echo $tran_id; ?>">N/A</span>&nbsp; 
+						ETA: <span id="eta-<?php echo $tran_id; ?>">N/A</span>&nbsp;
+					</p>
+				</div>
+				<div class="torrent-controls" id="torrent-controls-<?php echo $tran_id; ?>">
+					<p>
+						<span class="torrent-start torrent-control-<?php echo $tran_id; ?>"><input type="button" value="Start" /></span>
+						<span class="torrent-stop torrent-control-<?php echo $tran_id; ?>"><input type="button" value="Stop" /></span>
+						<span class="torrent-wait torrent-control-<?php echo $tran_id; ?>"><input type="button" value="Wait..." /></span><br />
+						<span class="torrent-options torrent-control-<?php echo $tran_id; ?>"><input type="button" value="Options" /></span><br />
+						<span class="torrent-delete torrent-control-<?php echo $tran_id; ?>"><input type="button" value="Delete" /></span><br />
+						<span class="torrent-show-files torrent-files-<?php echo $tran_id; ?>"><input type="button" value="Show files" /></span>
+						<span class="torrent-hide-files torrent-files-<?php echo $tran_id; ?>"><input type="button" value="Hide files" /></span>
+					</p>
+				</div>
+			</div>
+		<?php 
+				}
+				$transmission_ids = implode( ',', $transmission_ids );
+		?>
+			<p><input type="hidden" name="transmission-ids" id="transmission-ids" value="<?php echo $transmission_ids; ?>" /></p>
+		<?php
+			}
+		?>
+	<?php } else { ?>
+		<a href="index.php/Home">Return home</a>
+	<?php } ?>
+</div>
